@@ -7,7 +7,11 @@ use futures::{
 };
 use tokio::{
     net::TcpStream,
-    sync::mpsc::{UnboundedReceiver, UnboundedSender},
+    sync::{
+        mpsc::{UnboundedReceiver, UnboundedSender},
+        oneshot::Sender,
+        Mutex,
+    },
 };
 use tokio_tungstenite::{tungstenite::Message, WebSocketStream};
 use tracing::{debug, error, info};
@@ -26,45 +30,54 @@ impl ClientId {
     }
 }
 
-pub struct Clients {
-    clients: BTreeMap<ClientId, Arc<Client>>,
-}
-
 #[derive(Clone)]
 pub struct Client {
-    id: ClientId,
+    _id: ClientId,
     ws_sender: UnboundedSender<Message>,
+    request_map: Arc<Mutex<BTreeMap<String, Sender<String>>>>,
 }
 
 impl Client {
     pub fn new(id: ClientId, ws_sender: UnboundedSender<Message>) -> Self {
-        Client { id, ws_sender }
+        Client {
+            _id: id,
+            ws_sender,
+            request_map: Arc::new(Mutex::new(BTreeMap::new())),
+        }
     }
 
     pub async fn send_message(&self, msg: Message) {
-        self.ws_sender.send(msg).unwrap();
+        let _result = self.ws_sender.send(msg);
+    }
+
+    pub async fn close(&self) {
+        let _result = self.ws_sender.closed().await;
+        self.request_map.lock().await.clear();
     }
 }
 
 pub struct ClientWebSocketHandler {
     ws_reader: SplitStream<WebSocketStream<TcpStream>>,
     ws_writer: SplitSink<WebSocketStream<TcpStream>, Message>,
-    client: Arc<Client>,
-    server_receiver: UnboundedReceiver<Message>,
+    _client: Arc<Client>,
+    server_to_ws_receiver: UnboundedReceiver<Message>,
+    ws_to_server_sender: UnboundedSender<Message>,
 }
 
 impl ClientWebSocketHandler {
     pub fn new(
-        stream: WebSocketStream<TcpStream>,
+        ws_reader: SplitStream<WebSocketStream<TcpStream>>,
+        ws_writer: SplitSink<WebSocketStream<TcpStream>, Message>,
         client: Arc<Client>,
-        receiver: UnboundedReceiver<Message>,
+        server_to_ws_receiver: UnboundedReceiver<Message>,
+        ws_to_server_sender: UnboundedSender<Message>,
     ) -> Self {
-        let (ws_writer, ws_reader) = stream.split();
         ClientWebSocketHandler {
             ws_reader,
             ws_writer,
-            client,
-            server_receiver: receiver,
+            _client: client,
+            server_to_ws_receiver,
+            ws_to_server_sender,
         }
     }
 
@@ -72,7 +85,7 @@ impl ClientWebSocketHandler {
         info!("ClientWebSocketHandler::run_loop");
         loop {
             let result = tokio::select! {
-                Some(recv) = self.server_receiver.recv() => {
+                Some(recv) = self.server_to_ws_receiver.recv() => {
                     self.ws_writer.send(recv).await.map_err(|e| e.into())
                 }
                 Some(msg) = self.ws_reader.next() => {
@@ -86,8 +99,12 @@ impl ClientWebSocketHandler {
                 }
             };
 
+            // 에러 상황은 이미 write stream이 닫혔다. 그래서 ws_receiver에 데이터가 남아 있더라도 그냥 명시적으로 커넥션을 닫고, 데이터를 날린다.
+            // 이 상황에서 데이터 유실이 발생하기 때문에 인식해야할 필요는 있다.
             if let Err(e) = result {
                 error!("Error: {}", e);
+                self.server_to_ws_receiver.close();
+                return;
             }
         }
     }
@@ -95,7 +112,7 @@ impl ClientWebSocketHandler {
     async fn _handle_message_frame(&mut self, msg: Message) -> Result<()> {
         debug!("Received message: {:?}", msg);
         match msg {
-            Message::Text(_) => self.ws_writer.send(msg).await.map_err(|e| e.into()),
+            Message::Text(_) => self.ws_to_server_sender.send(msg).map_err(|e| e.into()),
             Message::Ping(p) => self
                 .ws_writer
                 .send(Message::Pong(p))

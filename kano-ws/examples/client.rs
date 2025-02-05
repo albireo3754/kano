@@ -21,6 +21,7 @@ async fn main() {
     for i in 0..3 {
         ws_stream.send(Message::Ping("ping".into())).await.unwrap();
     }
+    // let (w, r) = ws_stream.split();
     ws_stream
         .close(Some(CloseFrame {
             code: CloseCode::Normal,
