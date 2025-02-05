@@ -31,15 +31,15 @@ impl ClientId {
 }
 
 #[derive(Clone)]
-pub struct Client {
+pub struct UserWebsocketImpl {
     _id: ClientId,
     ws_sender: UnboundedSender<Message>,
     request_map: Arc<Mutex<BTreeMap<String, Sender<String>>>>,
 }
 
-impl Client {
+impl UserWebsocketImpl {
     pub fn new(id: ClientId, ws_sender: UnboundedSender<Message>) -> Self {
-        Client {
+        UserWebsocketImpl {
             _id: id,
             ws_sender,
             request_map: Arc::new(Mutex::new(BTreeMap::new())),
@@ -59,7 +59,7 @@ impl Client {
 pub struct ClientWebSocketHandler {
     ws_reader: SplitStream<WebSocketStream<TcpStream>>,
     ws_writer: SplitSink<WebSocketStream<TcpStream>, Message>,
-    _client: Arc<Client>,
+    _client: Arc<UserWebsocketImpl>,
     server_to_ws_receiver: UnboundedReceiver<Message>,
     ws_to_server_sender: UnboundedSender<Message>,
 }
@@ -68,7 +68,7 @@ impl ClientWebSocketHandler {
     pub fn new(
         ws_reader: SplitStream<WebSocketStream<TcpStream>>,
         ws_writer: SplitSink<WebSocketStream<TcpStream>, Message>,
-        client: Arc<Client>,
+        client: Arc<UserWebsocketImpl>,
         server_to_ws_receiver: UnboundedReceiver<Message>,
         ws_to_server_sender: UnboundedSender<Message>,
     ) -> Self {

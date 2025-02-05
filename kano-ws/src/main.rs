@@ -45,7 +45,7 @@ async fn run_websocket_server() {
             let (server_to_ws_sender, server_to_ws_receiver) =
                 tokio::sync::mpsc::unbounded_channel();
             let client_id = client::ClientId::new("1");
-            let client = client::Client::new(client_id, server_to_ws_sender);
+            let client = client::UserWebsocketImpl::new(client_id, server_to_ws_sender);
             let client = Arc::new(client);
             let client_handler = ClientWebSocketHandler::new(
                 ws_receiver,
