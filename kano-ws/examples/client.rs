@@ -6,7 +6,7 @@ use url::Url;
 
 #[tokio::main]
 async fn main() {
-    let url = Url::parse("ws://127.0.0.1:8080").unwrap();
+    let _url = Url::parse("ws://127.0.0.1:8080").unwrap();
     let (mut ws_stream, _) = connect_async("ws://127.0.0.1:8080")
         .await
         .expect("Failed to connect");
@@ -18,7 +18,7 @@ async fn main() {
     //     .await
     //     .expect("Failed to send message");
 
-    for i in 0..3 {
+    for _i in 0..3 {
         ws_stream.send(Message::Ping("ping".into())).await.unwrap();
     }
     // let (w, r) = ws_stream.split();

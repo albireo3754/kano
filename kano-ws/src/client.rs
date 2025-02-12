@@ -31,18 +31,18 @@ impl ClientId {
 }
 
 #[derive(Clone)]
-pub struct UserWebsocketImpl {
+pub struct Client {
     _id: ClientId,
     ws_sender: UnboundedSender<Message>,
-    request_map: Arc<Mutex<BTreeMap<String, Sender<String>>>>,
+    _request_map: Arc<Mutex<BTreeMap<String, Sender<String>>>>,
 }
 
-impl UserWebsocketImpl {
+impl Client {
     pub fn new(id: ClientId, ws_sender: UnboundedSender<Message>) -> Self {
-        UserWebsocketImpl {
+        Client {
             _id: id,
             ws_sender,
-            request_map: Arc::new(Mutex::new(BTreeMap::new())),
+            _request_map: Arc::new(Mutex::new(BTreeMap::new())),
         }
     }
 
@@ -50,16 +50,16 @@ impl UserWebsocketImpl {
         let _result = self.ws_sender.send(msg);
     }
 
-    pub async fn close(&self) {
+    pub async fn _close(&self) {
         let _result = self.ws_sender.closed().await;
-        self.request_map.lock().await.clear();
+        self._request_map.lock().await.clear();
     }
 }
 
 pub struct ClientWebSocketHandler {
     ws_reader: SplitStream<WebSocketStream<TcpStream>>,
     ws_writer: SplitSink<WebSocketStream<TcpStream>, Message>,
-    _client: Arc<UserWebsocketImpl>,
+    _client: Arc<Client>,
     server_to_ws_receiver: UnboundedReceiver<Message>,
     ws_to_server_sender: UnboundedSender<Message>,
 }
@@ -68,7 +68,7 @@ impl ClientWebSocketHandler {
     pub fn new(
         ws_reader: SplitStream<WebSocketStream<TcpStream>>,
         ws_writer: SplitSink<WebSocketStream<TcpStream>, Message>,
-        client: Arc<UserWebsocketImpl>,
+        client: Arc<Client>,
         server_to_ws_receiver: UnboundedReceiver<Message>,
         ws_to_server_sender: UnboundedSender<Message>,
     ) -> Self {
@@ -99,8 +99,6 @@ impl ClientWebSocketHandler {
                 }
             };
 
-            // 에러 상황은 이미 write stream이 닫혔다. 그래서 ws_receiver에 데이터가 남아 있더라도 그냥 명시적으로 커넥션을 닫고, 데이터를 날린다.
-            // 이 상황에서 데이터 유실이 발생하기 때문에 인식해야할 필요는 있다.
             if let Err(e) = result {
                 error!("Error: {}", e);
                 self.server_to_ws_receiver.close();
