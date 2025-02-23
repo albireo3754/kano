@@ -1,4 +1,4 @@
-import { GiftedChat, IMessage } from 'react-native-gifted-chat';
+import { GiftedChat, IMessage, Message } from 'react-native-gifted-chat';
 import { create } from 'zustand'
 import { combine } from 'zustand/middleware'
 
@@ -17,8 +17,10 @@ export const useStore = create<AppState>((set) => ({
   messages: [],
   sendMessage: (message) => {
     set((state) => {
-      console.log("State.ws", state.ws?.readyState);
-      state.ws?.send(JSON.stringify(message));
+      console.log("Wesocket State: ", state.ws?.readyState);
+      message.forEach((msg) => {
+        state.ws?.send(JSON.stringify(msg))
+      });
       return {};
       // return ({
       //   messages: GiftedChat.append(state.messages, message),
@@ -37,9 +39,9 @@ export const useStore = create<AppState>((set) => ({
 
       ws.onmessage = (event) => {
         console.log('WebSocket message received:', event.data);
-        const message: IMessage[] = JSON.parse(event.data);
+        const message: IMessage = JSON.parse(event.data);
         set((state) => ({
-          messages: GiftedChat.append(state.messages, message),
+          messages: GiftedChat.append(state.messages, [message]),
         }));
       };
 
