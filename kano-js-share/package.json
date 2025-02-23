@@ -1,10 +1,7 @@
 {
-  "name": "kano-ws-js",
+  "name": "kano-js-share",
   "module": "index.ts",
   "type": "module",
-  "dependencies": {
-    "kano-js-share": "file:../kano-js-share"
-  },
   "devDependencies": {
     "@types/bun": "latest"
   },

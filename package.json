@@ -1,0 +1,7 @@
+{
+    "workspaces": [
+        "packages/kano-js-share",
+        "packages/kano-rn",
+        "packages/kano-ws-js"
+    ]
+}

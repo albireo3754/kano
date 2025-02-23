@@ -1,3 +1,5 @@
+import type { Message } from "kano-js-share";
+
 const server = Bun.serve({
     fetch(req, server) {
         // console.log(req.url); // the request URL
@@ -7,7 +9,12 @@ const server = Bun.serve({
         message(ws, message) {
 
             server.publish("the-group-chat", `entered: ${message}`);
-        }, // a message is received
+            if (typeof message === "string") {
+                let msg: Message = JSON.parse(message);
+                console.log("Message received", msg);
+                server.publish("the-group-chat", JSON.stringify(msg));
+            } // a message is received
+        },
         open(ws) {
             const msg = `enterd chat`;
             // ws.subscribe("the-group-chat");
