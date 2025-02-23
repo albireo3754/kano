@@ -1,5 +1,5 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
+import { Tabs, useNavigationContainerRef, useRootNavigationState, useRouter } from 'expo-router';
+import React, { useEffect, useLayoutEffect } from 'react';
 import { Platform } from 'react-native';
 
 import { HapticTab } from '@/components/HapticTab';
@@ -7,9 +7,38 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import HomeScreen from '.';
+import TabTwoScreen from './explore';
+import ChatScreen from './chat';
+
+
+const Tab = createBottomTabNavigator();
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const router = useRouter();
+
+  // useEffect(() => {
+  //   console.log("TabLayout mounted");
+  //   router.push("/chat");
+  //   return () => {
+  //     console.log("TabLayout unmounted");
+  //   };
+  // }, []);
+
+  const navigationRef = useNavigationContainerRef();
+
+  useLayoutEffect(() => {
+    const unsubscribe = navigationRef.addListener("state", () => {
+      if (navigationRef.isReady()) {
+        router.push("/chat");
+        unsubscribe(); // 리스너 해제
+      }
+    });
+
+    return () => unsubscribe();
+  }, [navigationRef]);
 
   return (
     <Tabs
@@ -23,7 +52,6 @@ export default function TabLayout() {
           //   // Use a transparent background on iOS to show the blur effect
           //   position: 'absolute',
           // },
-          default: {},
         }),
       }}>
       <Tabs.Screen
@@ -43,10 +71,17 @@ export default function TabLayout() {
       <Tabs.Screen
         name="chat"
         options={{
-          title: '',
+          title: 'chat',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
         }}
       />
     </Tabs>
   );
 }
+
+export const unstable_settings = {
+  initialRouteName: 'chat',
+  // search: {
+  //   initialRouteName: 'chat',
+  // },
+};
