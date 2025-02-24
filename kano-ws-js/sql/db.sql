@@ -1,0 +1,14 @@
+CREATE TABLE messages (
+    id VARCHAR(255) PRIMARY KEY,
+    request_id VARCHAR(255) NOT NULL,
+    text TEXT NOT NULL,
+    created_at BIGINT NOT NULL,
+    user_id VARCHAR(255) NOT NULL,
+    system BOOLEAN DEFAULT FALSE,
+);
+
+CREATE TABLE users (
+    id VARCHAR(255) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL
+);
