@@ -1,6 +1,8 @@
-import { GiftedChat, IMessage, Message } from 'react-native-gifted-chat';
+import { CreateMessageDTO, Message } from 'kano-js-share';
+import { GiftedChat, IMessage } from 'react-native-gifted-chat';
 import { create } from 'zustand'
 import { combine } from 'zustand/middleware'
+import { v4 as uuidv4 } from 'uuid';
 
 interface MessagesState {
   messages: IMessage[]
@@ -15,11 +17,19 @@ interface WebsocketState {
 
 export const useStore = create<AppState>((set) => ({
   messages: [],
-  sendMessage: (message) => {
+  sendMessage: (messages) => {
     set((state) => {
-      console.log("Wesocket State: ", state.ws?.readyState);
-      message.forEach((msg) => {
-        state.ws?.send(JSON.stringify(msg))
+      console.log("State.ws", state.ws?.readyState);
+
+      messages.forEach((message) => {
+        console.log("Sending message", message);
+        let createMessageDTO: CreateMessageDTO = {
+          text: message.text,
+          conversationId: "1",
+          requestId: uuidv4(),
+        }
+        let json = JSON.stringify(createMessageDTO);
+        state.ws?.send(json);
       });
       return {};
       // return ({
@@ -39,9 +49,11 @@ export const useStore = create<AppState>((set) => ({
 
       ws.onmessage = (event) => {
         console.log('WebSocket message received:', event.data);
-        const message: IMessage = JSON.parse(event.data);
+        const message: Message = JSON.parse(event.data);
+
+        const imessage = messageToIMessage(message);
         set((state) => ({
-          messages: GiftedChat.append(state.messages, [message]),
+          messages: GiftedChat.append(state.messages, [imessage]),
         }));
       };
 
@@ -54,7 +66,7 @@ export const useStore = create<AppState>((set) => ({
       };
 
       return ({
-        ws: ws,
+        ws,
       });
     })
   },
@@ -63,3 +75,21 @@ export const useStore = create<AppState>((set) => ({
 type AppState = MessagesState & WebsocketState;
 //  & UserState & TodoState;
 export default AppState;
+
+function messageToIMessage(message: Message): IMessage {
+  return {
+    _id: message.id,
+    text: message.text,
+    createdAt: bigIntToDate(message.createdAt),
+    user: {
+      _id: message.userId,
+      name: "unknown",
+      avatar: "null",
+    },
+  };
+}
+
+
+function bigIntToDate(bigint: BigInt): Date {
+  return new Date(Number(bigint));
+}

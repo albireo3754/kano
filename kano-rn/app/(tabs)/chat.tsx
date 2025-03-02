@@ -12,7 +12,7 @@ export default function ChatScreen() {
 
   const renderTime = (props: any) => {
     return (
-      <Text>{props.currentMessage.createdAt.toLocaleString()}</Text>
+      <Text style={{ marginLeft: 'auto' }}>{props.currentMessage.createdAt.toLocaleString()}</Text>
     )
   }
 
@@ -54,7 +54,7 @@ export default function ChatScreen() {
       onInputTextChanged={setText}
       bottomOffset={200}
       user={{
-        _id: 1,
+        _id: "1",
       }}
     />
   )

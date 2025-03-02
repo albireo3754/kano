@@ -1,4 +1,4 @@
-import { Tabs, useNavigationContainerRef, useRootNavigationState, useRouter } from 'expo-router';
+import { Tabs, useNavigationContainerRef, useRouter } from 'expo-router';
 import React, { useEffect, useLayoutEffect } from 'react';
 import { Platform } from 'react-native';
 
@@ -8,9 +8,6 @@ import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import HomeScreen from '.';
-import TabTwoScreen from './explore';
-import ChatScreen from './chat';
 
 
 const Tab = createBottomTabNavigator();
@@ -19,17 +16,9 @@ export default function TabLayout() {
   const colorScheme = useColorScheme();
   const router = useRouter();
 
-  // useEffect(() => {
-  //   console.log("TabLayout mounted");
-  //   router.push("/chat");
-  //   return () => {
-  //     console.log("TabLayout unmounted");
-  //   };
-  // }, []);
-
   const navigationRef = useNavigationContainerRef();
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const unsubscribe = navigationRef.addListener("state", () => {
       if (navigationRef.isReady()) {
         router.push("/chat");
