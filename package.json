@@ -3,5 +3,9 @@
         "packages/kano-js-share",
         "packages/kano-rn",
         "packages/kano-ws-js"
-    ]
+    ],
+    "devDependencies": {
+        "drizzle-kit": "^0.30.4",
+        "tsx": "^4.19.3"
+    }
 }

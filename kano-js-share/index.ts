@@ -1,7 +1,9 @@
-export interface User {
-    _id: string;
-    name: string;
-    email: string;
+// export * from './util';
+
+export interface SimpleUser {
+    id: string;
+    // name: string;
+    // email: string;
 }
 
 export interface ApiResponse<T> {
@@ -9,11 +11,20 @@ export interface ApiResponse<T> {
     data: T;
 }
 
-export interface Message {
-    _id: string;
+export interface CreateMessageDTO {
+    requestId: string;
     text: string;
-    createdAt: number;
-    user: User;
+    conversationId: string;
+}
+
+export interface Message {
+    id: string;
+    conversationId: string;
+    requestId?: string;
+    text: string;
+    createdAt: BigInt;
+    userId: number;
+
     image?: string;
     video?: string;
     audio?: string;
@@ -23,3 +34,4 @@ export interface Message {
     pending?: boolean;
     // quickReplies?: QuickReplies;
 }
+
