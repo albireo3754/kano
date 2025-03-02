@@ -1,1 +1,0 @@
-ALTER TABLE `messages` ADD `conversationId` varchar(255) NOT NULL;

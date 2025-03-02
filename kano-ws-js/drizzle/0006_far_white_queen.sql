@@ -1,1 +1,0 @@
-CREATE INDEX `conversation_id_idx` ON `messages` (`conversationId`);

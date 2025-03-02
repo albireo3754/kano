@@ -1,4 +1,4 @@
-import { index, int, mysqlTable, serial, varchar } from 'drizzle-orm/mysql-core';
+import { bigint, date, index, int, mysqlTable, serial, varchar } from 'drizzle-orm/mysql-core';
 
 export const usersTable = mysqlTable('users', {
     id: int().autoincrement().primaryKey(),
@@ -11,7 +11,8 @@ export const messagesTable = mysqlTable('messages', {
     id: varchar({ length: 255 }).primaryKey(),
     conversationId: varchar({ length: 255 }).notNull(),
     text: varchar({ length: 255 }).notNull(),
-    createdAt: int().notNull(),
+    // createdAt: date().notNull(),
+    createdAt: bigint({ mode: "bigint" }).notNull(),
     userId: int().notNull(),
 }, (table) => [
     index('conversation_id_idx').on(table.conversationId)
