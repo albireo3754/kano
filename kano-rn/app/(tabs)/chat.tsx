@@ -12,7 +12,7 @@ export default function ChatScreen() {
 
   const renderTime = (props: any) => {
     return (
-      <Text style={{ marginLeft: 'auto' }}>{props.currentMessage.createdAt.toLocaleString()}</Text>
+      <Text style={{ flex: 0, }}>{props.currentMessage.createdAt.toLocaleString()}</Text>
     )
   }
 
@@ -20,29 +20,104 @@ export default function ChatScreen() {
     <GiftedChat
       messages={messages}
       onSend={messages => sendMessage(messages)}
+
       text={text}
       // renderSend={renderInputToolbar}
       renderMessage={
         (props) => {
           return (
-            <Message {...props}></Message>
+            <Message {...props} containerStyle={{
+              left: {
+                // backgroundColor: '#fff',
+                margin: 0,
+                // flexShrink: 1,
+                // flexGrow: 1,
+                // flexBasis: 'auto',
+              },
+              right: {
+                // backgroundColor: '#000',
+                margin: 0,
+                // flexShrink: 1,
+                // flexGrow: 1,
+                // flexBasis: 'auto',
+              }
+            }}
+
+            ></Message>
           )
         }
       }
       renderBubble={props => {
         return (
-          <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'flex-end', margin: 0 }}>
+          <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'flex-end', margin: 0, flexShrink: 0, flexGrow: 0 }}>
 
             {props.position == 'right' ? renderTime(props) : null}
             <Bubble
               {...props}
 
-              wrapperStyle={{
+              containerStyle={{
                 left: {
-                  backgroundColor: '#fff',
+                  // backgroundColor: '#fff',
+                  margin: 0,
+                  flex: 0,
+                  // marginLeft: 0,
+                  // marginRight: 0,
+                  // flexShrink: 1,
+                  // flexBasis: 'auto',
                 },
                 right: {
-                  backgroundColor: '#000',
+                  // backgroundColor: '#000',
+                  margin: 0,
+                  flex: 0,
+                  // marginLeft: 0,
+                  // marginRight: 0,
+                  // flexShrink: 1,
+
+                  // flexBasis: 'auto',
+                }
+              }}
+
+              textStyle={{
+                left: {
+                  // backgroundColor: '#333',
+                  margin: 0,
+                  padding: 0,
+                  // flexBasis: 'auto',
+                  // flexShrink: 1,
+                  // marginLeft: 0,
+                  // marginRight: 0,
+                  // flex: 0,
+                },
+                right: {
+                  // backgroundColor: '#777',
+                  margin: 0,
+                  padding: 0,
+                  // flex: 0,
+                  // marginLeft: 0,
+                  // marginRight: 0,
+                  // flexBasis: 'auto',
+                  // flexShrink: 1,
+                }
+              }}
+
+
+
+              wrapperStyle={{
+                left: {
+                  // backgroundColor: '#fff',
+                  // flexShrink: 1,
+
+                  // flexBasis: 'auto',
+                  marginLeft: 0,
+                  marginRight: 0,
+                },
+                right: {
+                  // backgroundColor: '#000',
+                  // flexShrink: 1,
+
+                  // flexBasis: 'auto',
+                  marginLeft: 0,
+                  marginRight: 0,
                 },
               }}
               renderTime={() => null}
@@ -54,7 +129,7 @@ export default function ChatScreen() {
       onInputTextChanged={setText}
       bottomOffset={200}
       user={{
-        _id: "1",
+        _id: 1,
       }}
     />
   )
